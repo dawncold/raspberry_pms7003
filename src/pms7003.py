@@ -103,3 +103,7 @@ def read_data():
         return data
     finally:
         ser.close()
+
+
+if __name__ == '__main__':
+    print(read_data())
