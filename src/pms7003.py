@@ -87,7 +87,7 @@ def read_data():
         if not valid_frame_checksum(frame):
             print('frame checksum mismatch')
             return
-        data = decode_frame(frame)
+        data = {'data': decode_frame(frame)}
         version, error_code = get_version_and_error_code(frame)
         data['version'] = version
         data['errcode'] = error_code
@@ -100,6 +100,10 @@ if __name__ == '__main__':
     data = read_data()
     if not data:
         print('no data')
-    for k in sorted(data):
-        v = data[k]
+        exit(0)
+    if data['errcode'] != 0x00:
+        print('got error: {}'.format(data['errcode']))
+        exit(-1)
+    for k in sorted(data['data'], key=lambda x: int(x)):
+        v = data['data'][k]
         print('{}: {} {}'.format(v[0], v[1], v[2]))
