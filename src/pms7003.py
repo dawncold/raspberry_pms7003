@@ -101,7 +101,7 @@ if __name__ == '__main__':
     if not data:
         print('no data')
         exit(0)
-    if data['errcode'] != 0x00:
+    if data['errcode'] != '\0':
         print('got error: {}'.format(data['errcode']))
         exit(-1)
     for k in sorted(data['data'], key=lambda x: int(x)):
