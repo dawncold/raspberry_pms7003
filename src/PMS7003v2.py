@@ -36,29 +36,16 @@ DATA_DESC = [
 
 
 class PMS7003:
-    def __init__(self, serial_device='/dev/ttyAMA0', gpio_set_no=17, gpio_reset_no=18):
-        self.gpio_set = gpiozero.LED(gpio_set_no)
-        self.gpio_reset = gpiozero.LED(gpio_reset_no)
-        self.reset_device()
+    def __init__(self, serial_device='/dev/ttyAMA0'):
         self.ser = None
         self.serial_device = serial_device
         self._setup_serial()
-
-    def reset_device(self):
-        self.gpio_reset.off()
 
     def _setup_serial(self):
         self.ser = serial.Serial(port=self.serial_device, baudrate=9600, bytesize=serial.EIGHTBITS,
                                  parity=serial.PARITY_NONE, stopbits=serial.STOPBITS_ONE)
 
-    def set_device_working_state(self):
-        self.gpio_set.on()
-
-    def set_device_sleep_state(self):
-        self.gpio_set.off()
-
     def get_frame(self):
-        self.set_device_working_state()
         while True:
             b = self.ser.read()
             if b != chr(HEAD_FIRST):
@@ -70,7 +57,6 @@ class PMS7003:
             if len(body) != BODY_LENGTH:
                 continue
             return body
-        self.set_device_sleep_state()
 
     def is_valid_frame(self, _frame):
         checksum = ord(_frame[-2]) << 8 | ord(_frame[-1])
@@ -91,19 +77,14 @@ class PMS7003:
         return _frame[-4], _frame[-3]
 
     def read(self):
-        try:
-            frame = self.get_frame()
-        except Exception as e:
-            print('get frame got exception: {}'.format(e.message))
-        else:
-            if not self.is_valid_frame(frame):
-                print('frame checksum mismatch')
-                return
-            data = {'data': self.decode_frame(frame)}
-            version, error_code = self.get_version_and_error_code(frame)
-            data['version'] = version
-            data['errcode'] = error_code
-            return data
+        frame = self.get_frame()
+        if not self.is_valid_frame(frame):
+            raise Exception('frame checksum mismatch')
+        data = {'data': self.decode_frame(frame)}
+        version, error_code = self.get_version_and_error_code(frame)
+        data['version'] = version
+        data['errcode'] = error_code
+        return data
 
 
 if __name__ == '__main__':
