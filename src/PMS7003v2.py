@@ -39,6 +39,7 @@ class PMS7003:
     def __init__(self, serial_device='/dev/ttyAMA0', gpio_set_no=17, gpio_reset_no=18):
         self.gpio_set = gpiozero.LED(gpio_set_no)
         self.gpio_reset = gpiozero.LED(gpio_reset_no)
+        self.reset_device()
         self.ser = None
         self.serial_device = serial_device
         self._setup_serial()
